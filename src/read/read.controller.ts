@@ -16,7 +16,7 @@ export class ReadController {
 
   @Get('/')
   @HttpCode(HttpStatus.OK)
-  async read(@Req() req: Request) {
-    return await this.readService.read(req.query.file);
+  async read(@Req() req: Request): Promise<any> {
+    return await this.readService.read();
   }
 }
