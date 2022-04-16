@@ -1,14 +1,8 @@
-import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  StreamableFile,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CsvParser } from 'nest-csv-parser';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as es from 'event-stream';
-import { Transactions } from 'src/entities/transaction.entity';
 const dirPathRead = path.join(__dirname, '../../src/assets/transactions.csv');
 const dirPathWrite = path.join(__dirname, '../../src/assets/transactions.json');
 
