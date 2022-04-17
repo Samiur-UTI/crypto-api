@@ -25,34 +25,53 @@ export class ReadService {
   ) {}
   async read(): Promise<void> {
     const readStream = fs.createReadStream(dirPathRead);
-    const repo = this.transactionsRepository;
-    const s = readStream
-      .pipe(es.split())
-      .pipe(
-        es.mapSync(async function (line: string) {
-          s.pause();
-          const lineArray = line.split(',');
-          if (
-            lineArray[0] !== 'timestamp' &&
-            lineArray[1] !== 'transaction_type' &&
-            lineArray[2] !== 'token' &&
-            lineArray[3] !== 'amount'
-          ) {
-            const transaction = new Transactions();
-            transaction.timestamp = parseInt(lineArray[0]);
-            transaction.transactionType = lineArray[1];
-            transaction.token = lineArray[2];
-            transaction.amount = parseFloat(lineArray[3]);
-            await repo.insert(transaction);
+    const connection = this.connection;
+    readStream
+      .on('data', async (data: any) => {
+        const dataArray = data.toString().split('\n');
+        const dataArrayLength = dataArray.length;
+        const chunk = [];
+        for (let i = 0; i < dataArrayLength; i++) {
+          const dataArraySplit = dataArray[i].split(',');
+          const dataArraySplitLength = dataArraySplit.length;
+          const transaction = {};
+          for (let j = 0; j < dataArraySplitLength; j++) {
+            if (j === 0) {
+              transaction['timestamp'] =
+                dataArraySplit[j] === 'timestamp'
+                  ? 0
+                  : parseFloat(dataArraySplit[j]);
+            } else if (j === 1) {
+              transaction['transactionType'] =
+                dataArraySplit[j] === 'transaction_type'
+                  ? 'DEPOSIT'
+                  : dataArraySplit[j];
+            } else if (j === 2) {
+              transaction['token'] =
+                dataArraySplit[j];
+            } else if (j === 3) {
+              transaction['amount'] =
+                dataArraySplit[j] === 'amount'
+                  ? 0
+                  : parseFloat(dataArraySplit[j]);
+            }
           }
-          s.resume();
-        }),
-      )
-      .on('error', function (err) {
-        console.log('Error while reading file.', err);
+          chunk.push(transaction);
+        }
+        console.log(chunk);
+        await connection
+          .getRepository(Transactions)
+          .createQueryBuilder('transactions')
+          .insert()
+          .into('transactions')
+          .values(chunk)
+          .execute();
       })
-      .on('end', function () {
-        console.log('Read entire file');
+      .on('end', async () => {
+        console.log('end');
+      })
+      .on('error', async (err: any) => {
+        console.log(err);
       });
   }
 }

@@ -4,7 +4,7 @@ export enum transactionType {
   WITHDRAWL = 'WITHDRAWAL',
   DEPOSIT = 'DEPOSIT',
 }
-@Entity()
+@Entity('transactions')
 export class Transactions {
   @PrimaryGeneratedColumn()
   id: number;
