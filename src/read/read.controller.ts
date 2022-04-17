@@ -14,7 +14,7 @@ import { Request } from 'express';
 export class ReadController {
   constructor(private readService: ReadService) {}
 
-  @Get('/')
+  @Get('/read')
   @HttpCode(HttpStatus.OK)
   async read(@Req() req: Request): Promise<any> {
     return await this.readService.read();
