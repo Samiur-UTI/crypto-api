@@ -10,27 +10,27 @@ export class Transactions {
   id: number;
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'int',
   })
   timestamp: number;
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'enum',
     enum: [transactionType.WITHDRAWL, transactionType.DEPOSIT],
   })
   transactionType: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'varchar',
     length: 5,
   })
-  token: string;
+  token?: string;
 
   @Column({
-    nullable: false,
+    nullable: true,
     type: 'float',
   })
   amount: number;
