@@ -1,9 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 
-export enum transactionType {
-  WITHDRAWL = 'WITHDRAWAL',
-  DEPOSIT = 'DEPOSIT',
-}
+// export enum transactionType {
+//   WITHDRAWL = 'WITHDRAWAL',
+//   DEPOSIT = 'DEPOSIT',
+// }
 @Entity('transactions')
 export class Transactions {
   @PrimaryGeneratedColumn()
@@ -17,15 +17,16 @@ export class Transactions {
 
   @Column({
     nullable: true,
-    type: 'enum',
-    enum: [transactionType.WITHDRAWL, transactionType.DEPOSIT],
+    type: 'varchar',
+    length: 20,
+    // enum: [transactionType.WITHDRAWL, transactionType.DEPOSIT],
   })
   transactionType: string;
 
   @Column({
     nullable: true,
     type: 'varchar',
-    length: 5,
+    length: 20,
   })
   token?: string;
 
@@ -34,4 +35,5 @@ export class Transactions {
     type: 'float',
   })
   amount: number;
+  transaction_type: any;
 }
