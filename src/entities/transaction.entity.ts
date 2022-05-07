@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
 // export enum transactionType {
 //   WITHDRAWL = 'WITHDRAWAL',
@@ -9,6 +9,7 @@ export class Transactions {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Index()
   @Column({
     nullable: true,
     type: 'int',

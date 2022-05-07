@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as es from 'event-stream';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Transactions } from '../entities/transaction.entity';
+import { ParsingService } from '../utils/parsing';
 import {
   Repository,
   LessThan,
@@ -22,43 +23,22 @@ export class ReadService {
     @InjectRepository(Transactions)
     private transactionsRepository: Repository<Transactions>,
     private connection: Connection,
+    private parsingService: ParsingService,
   ) {}
-  async read(): Promise<void | any> {
-    const readStream = fs.createReadStream(dirPathRead);
+  async read(): Promise<string> {
+    const serverTime = await Promise.race([
+      this.transactionsRepository.find(),
+      setTimeout(() => {
+        return 'Data already in DB';
+      }, 15000),
+    ]);
     const connection = this.connection;
-    try {
-      const response = await this.transactionsRepository.find();
-      if (!response.length) {
+    if (typeof serverTime !== 'string') {
+      const readStream = fs.createReadStream(dirPathRead);
+      try {
         readStream
           .on('data', async (data: any) => {
-            const dataArray = data.toString().split('\n');
-            const dataArrayLength = dataArray.length;
-            const chunk = [];
-            for (let i = 0; i < dataArrayLength; i++) {
-              const dataArraySplit = dataArray[i].split(',');
-              const dataArraySplitLength = dataArraySplit.length;
-              const transaction = {};
-              for (let j = 0; j < dataArraySplitLength; j++) {
-                if (j === 0) {
-                  transaction['timestamp'] = Number(dataArraySplit[j])
-                    ? Number(dataArraySplit[j])
-                    : 0;
-                } else if (j === 1) {
-                  transaction['transactionType'] =
-                    dataArraySplit[j] === 'transaction_type'
-                      ? 'DEPOSIT'
-                      : dataArraySplit[j];
-                } else if (j === 2) {
-                  transaction['token'] =
-                    dataArraySplit[j] === 'token' ? '' : dataArraySplit[j];
-                } else if (j === 3) {
-                  transaction['amount'] = parseFloat(dataArraySplit[j])
-                    ? parseFloat(dataArraySplit[j])
-                    : 0;
-                }
-              }
-              chunk.push(transaction);
-            }
+            const chunk = await this.parsingService.parse(data);
             const response = await connection
               .getRepository(Transactions)
               .createQueryBuilder('transactions')
@@ -66,7 +46,7 @@ export class ReadService {
               .into('transactions')
               .values(chunk)
               .execute();
-            // console.log(response);
+            console.log(response);
           })
           .on('end', async () => {
             console.log('end');
@@ -74,10 +54,12 @@ export class ReadService {
           .on('error', async (err: any) => {
             console.log(err);
           });
+      } catch (error) {
+        console.log(error);
       }
-      return 'DATA ALREADY EXISTS';
-    } catch (error) {
-      throw new Error(error);
+      return 'Data inserted';
+    } else {
+      return serverTime;
     }
   }
 }
