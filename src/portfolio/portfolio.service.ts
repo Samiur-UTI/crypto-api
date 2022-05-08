@@ -20,7 +20,7 @@ export class PortfolioService {
     private transactionsRepository: Repository<Transactions>,
     private connection: Connection,
   ) {}
-  async get(): Promise<void> {
-    const transactions = await this.transactionsRepository.find();
+  async get(): Promise<string> {
+    return 'PortfolioService';
   }
 }

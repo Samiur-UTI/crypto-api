@@ -8,4 +8,4 @@ import { Transactions } from 'src/entities/transaction.entity';
   providers: [PortfolioService],
   controllers: [PortfolioController],
 })
-export class ReadModule {}
+export class PortfolioModule {}
