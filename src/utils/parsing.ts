@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable } from '@nestjs/common';
-
+import { Transactions } from '../entities/transaction.entity';
 @Injectable()
 export class ParsingService {
   constructor() {}
-  async parse(data: any): Promise<any> {
+  parse(data: string): Transactions[] {
     const dataArray = data.toString().split('\n');
     const dataArrayLength = dataArray.length;
     const chunk = [];

@@ -38,7 +38,7 @@ export class ReadService {
       try {
         readStream
           .on('data', async (data: any) => {
-            const chunk = await this.parsingService.parse(data);
+            const chunk = this.parsingService.parse(data);
             const response = await connection
               .getRepository(Transactions)
               .createQueryBuilder('transactions')
