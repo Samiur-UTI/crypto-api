@@ -20,7 +20,7 @@ export class PortfolioService {
     private transactionsRepository: Repository<Transactions>,
     private connection: Connection,
   ) {}
-  async get(): Promise<Record<string, unknown>> {
+  async getBtcPortFolio(): Promise<Record<string, unknown>> {
     const btcDeposit = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
@@ -29,6 +29,7 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'DEPOSIT',
       })
+      .orderBy('timestamp')
       .getRawOne();
     const btcWithdrawal = await this.connection
       .getRepository(Transactions)
@@ -38,7 +39,14 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'WITHDRAWAL',
       })
+      .orderBy('timestamp')
       .getRawOne();
+
+    return {
+      btcPortfolio: btcDeposit.amount - btcWithdrawal.amount,
+    };
+  }
+  async getEthPortfolio(): Promise<Record<string, unknown>> {
     const ethDeposit = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
@@ -47,6 +55,7 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'DEPOSIT',
       })
+      .orderBy('timestamp')
       .getRawOne();
     const ethWithdrawal = await this.connection
       .getRepository(Transactions)
@@ -56,7 +65,13 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'WITHDRAWAL',
       })
+      .orderBy('timestamp')
       .getRawOne();
+    return {
+      ethPortfolio: ethDeposit.amount - ethWithdrawal.amount,
+    };
+  }
+  async getXrpPortfolio(): Promise<Record<string, number>> {
     const xrpDeposit = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
@@ -65,6 +80,7 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'DEPOSIT',
       })
+      .orderBy('timestamp')
       .getRawOne();
     const xrpWithdrawal = await this.connection
       .getRepository(Transactions)
@@ -74,10 +90,9 @@ export class PortfolioService {
       .andWhere('transactionType = :transactionType', {
         transactionType: 'WITHDRAWAL',
       })
+      .orderBy('timestamp')
       .getRawOne();
     return {
-      btcPortfolio: btcDeposit.amount - btcWithdrawal.amount,
-      ethPortfolio: ethDeposit.amount - ethWithdrawal.amount,
       xrpPortfolio: xrpDeposit.amount - xrpWithdrawal.amount,
     };
   }

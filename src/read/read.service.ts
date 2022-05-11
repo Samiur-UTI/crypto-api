@@ -39,13 +39,14 @@ export class ReadService {
         readStream
           .on('data', async (data: any) => {
             const chunk = await this.parsingService.parse(data);
-            await connection
+            const response = await connection
               .getRepository(Transactions)
               .createQueryBuilder('transactions')
               .insert()
               .into('transactions')
               .values(chunk)
               .execute();
+            console.log(response);
           })
           .on('end', async () => {
             console.log('end');
