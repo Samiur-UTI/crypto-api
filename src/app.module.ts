@@ -4,7 +4,7 @@ import { AppService } from './app.service';
 import { ReadModule } from './read/read.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { Transactions } from 'src/entities/transaction.entity';
+import { PortfolioModule } from './portfolio/portfolio.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
@@ -19,6 +19,7 @@ import { Transactions } from 'src/entities/transaction.entity';
       synchronize: true,
     }),
     ReadModule,
+    PortfolioModule,
   ],
   controllers: [AppController],
   providers: [AppService],
