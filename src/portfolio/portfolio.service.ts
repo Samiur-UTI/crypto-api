@@ -20,80 +20,76 @@ export class PortfolioService {
     private transactionsRepository: Repository<Transactions>,
     private connection: Connection,
   ) {}
-  async getBtcPortFolio(): Promise<Record<string, unknown>> {
-    const btcDeposit = await this.connection
+  async getTokenPortfolio(token: string): Promise<Record<any, any>> {
+    const deposit = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
       .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'BTC' })
+      .where('token = :token', { token })
       .andWhere('transactionType = :transactionType', {
         transactionType: 'DEPOSIT',
       })
       .orderBy('timestamp')
       .getRawOne();
-    const btcWithdrawal = await this.connection
+    const withdrawal = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
       .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'BTC' })
+      .where('token = :token', { token })
       .andWhere('transactionType = :transactionType', {
         transactionType: 'WITHDRAWAL',
       })
       .orderBy('timestamp')
       .getRawOne();
-
     return {
-      btcPortfolio: btcDeposit.amount - btcWithdrawal.amount,
+      token,
+      portfolio: deposit.amount - withdrawal.amount,
     };
   }
-  async getEthPortfolio(): Promise<Record<string, unknown>> {
-    const ethDeposit = await this.connection
+  async getTokens(): Promise<any> {
+    const raw = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
-      .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'ETH' })
-      .andWhere('transactionType = :transactionType', {
-        transactionType: 'DEPOSIT',
-      })
-      .orderBy('timestamp')
-      .getRawOne();
-    const ethWithdrawal = await this.connection
-      .getRepository(Transactions)
-      .createQueryBuilder('transactions')
-      .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'ETH' })
-      .andWhere('transactionType = :transactionType', {
-        transactionType: 'WITHDRAWAL',
-      })
-      .orderBy('timestamp')
-      .getRawOne();
-    return {
-      ethPortfolio: ethDeposit.amount - ethWithdrawal.amount,
-    };
+      .select('token', 'token')
+      .groupBy('token')
+      .getRawMany();
+    const parsed = raw.reduce((acc: any[], token: { token: string }) => {
+      if (token.token !== '') {
+        acc.push(token.token);
+      }
+      return acc;
+    }, []);
+    return parsed;
   }
-  async getXrpPortfolio(): Promise<Record<string, number>> {
-    const xrpDeposit = await this.connection
+  async getDatePortfolio(timestamp: string, token: string): Promise<any> {
+    console.log('TIMESTAMP IS: ', timestamp);
+    const deposit = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
+      .select('token', 'token')
       .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'XRP' })
+      .where('timestamp = :timestamp', { timestamp })
       .andWhere('transactionType = :transactionType', {
         transactionType: 'DEPOSIT',
       })
-      .orderBy('timestamp')
-      .getRawOne();
-    const xrpWithdrawal = await this.connection
+      .andWhere('token = :token', { token })
+      .groupBy('token')
+      .getRawMany();
+    const withdrawal = await this.connection
       .getRepository(Transactions)
       .createQueryBuilder('transactions')
+      .select('token', 'token')
       .select('SUM(amount)', 'amount')
-      .where('token = :token', { token: 'XRP' })
+      .where('timestamp = :timestamp', { timestamp })
       .andWhere('transactionType = :transactionType', {
         transactionType: 'WITHDRAWAL',
       })
-      .orderBy('timestamp')
-      .getRawOne();
+      .andWhere('token = :token', { token })
+      .groupBy('token')
+      .getRawMany();
     return {
-      xrpPortfolio: xrpDeposit.amount - xrpWithdrawal.amount,
+      token,
+      portfolio: deposit[0].amount - withdrawal[0].amount,
     };
   }
 }

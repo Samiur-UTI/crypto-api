@@ -27,10 +27,14 @@ export class ReadService {
   ) {}
   async read(): Promise<string> {
     const serverTime = await Promise.race([
-      this.transactionsRepository.find(),
+      await this.connection
+        .getRepository(Transactions)
+        .createQueryBuilder('transactions')
+        .select('timestamp', 'timestamp')
+        .getCount(),
       setTimeout(() => {
         return 'Data already in DB';
-      }, 15000),
+      }, 20000),
     ]);
     const connection = this.connection;
     if (typeof serverTime !== 'string') {

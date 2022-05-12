@@ -1,9 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn, Index } from 'typeorm';
 
-// export enum transactionType {
-//   WITHDRAWL = 'WITHDRAWAL',
-//   DEPOSIT = 'DEPOSIT',
-// }
+export enum transactionType {
+  WITHDRAWL = 'WITHDRAWAL',
+  DEPOSIT = 'DEPOSIT',
+}
 @Entity('transactions')
 export class Transactions {
   @PrimaryGeneratedColumn()
@@ -12,15 +12,14 @@ export class Transactions {
   @Index()
   @Column({
     nullable: true,
-    type: 'int',
+    type: 'date',
   })
-  timestamp: number;
+  timestamp: string;
 
   @Column({
     nullable: true,
-    type: 'varchar',
-    length: 20,
-    // enum: [transactionType.WITHDRAWL, transactionType.DEPOSIT],
+    type: 'enum',
+    enum: [transactionType.WITHDRAWL, transactionType.DEPOSIT],
   })
   transactionType: string;
 
