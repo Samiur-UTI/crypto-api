@@ -25,8 +25,8 @@ export class ParsingService {
       for (let j = 0; j < dataArraySplitLength; j++) {
         if (j === 0) {
           transaction['timestamp'] = Number(dataArraySplit[j])
-            ? Number(dataArraySplit[j])
-            : 0;
+            ? this.timeFormatter(Number(dataArraySplit[j]))
+            : '2022-01-01';
         } else if (j === 1) {
           transaction['transactionType'] =
             dataArraySplit[j] === 'transaction_type'
@@ -44,5 +44,10 @@ export class ParsingService {
       chunk.push(transaction);
     }
     return chunk;
+  }
+  timeFormatter(timestamp: number): string {
+    const date = new Date(timestamp * 1000);
+    const stringDate = date.toISOString();
+    return stringDate.substring(0, stringDate.indexOf('T'));
   }
 }

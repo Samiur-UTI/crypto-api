@@ -8,5 +8,6 @@ import { ConversionModule } from 'src/conversion/conversion.module';
   imports: [TypeOrmModule.forFeature([Transactions]), ConversionModule],
   providers: [PortfolioService],
   controllers: [PortfolioController],
+  exports: [PortfolioService],
 })
 export class PortfolioModule {}
